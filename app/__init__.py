@@ -1,7 +1,7 @@
 from flask import Flask, app
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager # Added this
-from flask_cors import CORS # Highly recommended for React/Flask setups
+from flask_cors import CORS 
 from config.config import config
 
 db = SQLAlchemy()
@@ -11,7 +11,14 @@ def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
-    
+    CORS(app, 
+        resources={r"/api/*": {"origins": ["http://localhost:5173", "https://miliki-kasri.vercel.app"]}},
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    )
+
+
     if not app.config.get('JWT_SECRET_KEY'):
         app.config['JWT_SECRET_KEY'] = app.config.get('SECRET_KEY', 'fallback-very-secret-key')
 
@@ -19,11 +26,6 @@ def create_app(config_name='default'):
     db.init_app(app)
     jwt.init_app(app) 
     
-    
-    CORS(app, supports_credentials=True, origins=[
-    "http://localhost:5173",
-    "https://miliki-kasri.vercel.app"
-   ])
 
     # Register blueprints
     from app.routes.auth import auth_bp
