@@ -111,3 +111,13 @@ def setup():
     db.session.add(admin)
     db.session.commit()
     return jsonify({'message': 'Admin created successfully!'}), 201  
+
+@auth_bp.route('/reset-admin', methods=['GET'])
+def reset_admin():
+    from werkzeug.security import generate_password_hash
+    user = User.query.filter_by(username='admin').first()
+    if not user:
+        return jsonify({'error': 'Admin not found'}), 404
+    user.password_hash = generate_password_hash('admin123')
+    db.session.commit()
+    return jsonify({'message': 'Admin password reset to admin123'}), 200
