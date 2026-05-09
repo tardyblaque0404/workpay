@@ -8,8 +8,6 @@ from app import jwt
 
 auth_bp = Blueprint('auth', __name__)
 
-# --- JWT CUSTOM CLAIMS ---
-# This MUST be outside of any function to work
 @jwt.additional_claims_loader
 def add_claims_to_access_token(identity):
     user = User.query.get(identity)
@@ -82,6 +80,32 @@ def register():
         basic_salary  = data.get('basic_salary', 0.00)
     )
 
+
+    @auth_bp.route('/setup', methods=['GET'])
+    def setup():
+        
+    from werkzeug.security import generate_password_hash
+    from app import db
+    from app.models.models import User
+    
+    if User.query.first():
+        return jsonify({'message': 'Users already exist'}), 200
+    
+    admin = User(
+        username='admin',
+        password_hash=generate_password_hash('admin123'),
+        email='admin@milikikasri.com',
+        full_name='System Administrator',
+        role='admin',
+        basic_salary=0.00
+    )
+    db.session.add(admin)
+    db.session.commit()
+    return jsonify({'message': 'Admin created successfully!'}), 201
+
+
+
+
     db.session.add(new_user)
     db.session.commit()
     log_activity(new_user.user_id, f"New user '{new_user.username}' registered.")
@@ -90,3 +114,5 @@ def register():
         'message': 'User registered successfully.',
         'user': new_user.to_dict()
     }), 201
+
+    
