@@ -1,33 +1,21 @@
-from flask import Flask, app
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager # Added this
-from flask_cors import CORS 
+from flask_jwt_extended import JWTManager
 from config.config import config
 
 db = SQLAlchemy()
-jwt = JWTManager() 
+jwt = JWTManager()
 
 def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
-    CORS(app, 
-        resources={r"/api/*": {"origins": ["http://localhost:5173", "https://miliki-kasri.vercel.app"]}},
-        supports_credentials=True,
-        allow_headers=["Content-Type", "Authorization"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    )
-
-
     if not app.config.get('JWT_SECRET_KEY'):
-        app.config['JWT_SECRET_KEY'] = app.config.get('SECRET_KEY', 'fallback-very-secret-key')
+        app.config['JWT_SECRET_KEY'] = app.config.get('SECRET_KEY', 'fallback-secret')
 
-    
     db.init_app(app)
-    jwt.init_app(app) 
-    
+    jwt.init_app(app)
 
-    # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.users import users_bp
     from app.routes.attendance import attendance_bp
@@ -40,5 +28,23 @@ def create_app(config_name='default'):
     app.register_blueprint(payroll_bp,    url_prefix='/api/payroll')
     app.register_blueprint(reports_bp,    url_prefix='/api/reports')
 
+    # Handle preflight OPTIONS requests
+    @app.before_request
+    def handle_options():
+        if request.method == 'OPTIONS':
+            response = jsonify({'status': 'ok'})
+            response.headers['Access-Control-Allow-Origin'] = 'https://miliki-kasri.vercel.app'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            return response, 200
+
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers['Access-Control-Allow-Origin'] = 'https://miliki-kasri.vercel.app'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response
 
     return app
