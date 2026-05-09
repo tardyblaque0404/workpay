@@ -90,34 +90,3 @@ def register():
         'user': new_user.to_dict()
     }), 201
 
-@auth_bp.route('/setup', methods=['GET'])
-def setup():
-    """Temporary route to seed admin user - delete after use"""
-    from werkzeug.security import generate_password_hash
-    from app import db
-    from app.models.models import User
-    
-    if User.query.first():
-        return jsonify({'message': 'Users already exist'}), 200
-    
-    admin = User(
-        username='admin',
-        password_hash=generate_password_hash('admin123'),
-        email='admin@milikikasri.com',
-        full_name='System Administrator',
-        role='admin',
-        basic_salary=0.00
-    )
-    db.session.add(admin)
-    db.session.commit()
-    return jsonify({'message': 'Admin created successfully!'}), 201  
-
-@auth_bp.route('/reset-admin', methods=['GET'])
-def reset_admin():
-    from werkzeug.security import generate_password_hash
-    user = User.query.filter_by(username='admin').first()
-    if not user:
-        return jsonify({'error': 'Admin not found'}), 404
-    user.password_hash = generate_password_hash('admin123')
-    db.session.commit()
-    return jsonify({'message': 'Admin password reset to admin123'}), 200
