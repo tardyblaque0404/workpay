@@ -14,7 +14,7 @@ def check_role(*allowed_roles):
         return False
     return True
 
-# ── POST /api/attendance/checkin ──────────────────────
+
 @attendance_bp.route('/checkin', methods=['POST'])
 @jwt_required()
 def check_in():
@@ -56,7 +56,7 @@ def check_out():
     return jsonify({'message': 'Check-out recorded.', 'record': record.to_dict()}), 200
 
 
-# ── POST /api/attendance/manual (admin/manager) ───────
+
 @attendance_bp.route('/manual', methods=['POST'])
 @jwt_required()
 def manual_entry():

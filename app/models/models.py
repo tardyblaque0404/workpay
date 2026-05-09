@@ -13,7 +13,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     email      = db.Column(db.String(100), unique=True, nullable=False)
     full_name  = db.Column(db.String(100), nullable=False)
-    role       = db.Column(db.Enum('admin', 'manager', 'employee'), default='employee', nullable=False)
+    role = db.Column(db.Enum('admin', 'manager', 'employee', name='user_role'), default='employee', nullable=False)
     basic_salary = db.Column(db.Numeric(10, 2), default=0.00)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -48,7 +48,7 @@ class Attendance(db.Model):
     attendance_id  = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id        = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     date           = db.Column(db.Date, nullable=False)
-    status         = db.Column(db.Enum('present', 'absent', 'late', 'half_day'), default='present')
+    status = db.Column(db.Enum('present', 'absent', 'late', 'half_day', name='attendance_status'), default='present')
     check_in_time  = db.Column(db.Time, nullable=True)
     check_out_time = db.Column(db.Time, nullable=True)
     notes          = db.Column(db.String(255), nullable=True)
@@ -83,7 +83,7 @@ class Payroll(db.Model):
     deductions     = db.Column(db.Numeric(10, 2), default=0.00)
     net_salary     = db.Column(db.Numeric(10, 2), nullable=False)
     days_worked    = db.Column(db.Integer, default=0)
-    status         = db.Column(db.Enum('draft', 'approved', 'paid'), default='draft')
+    status = db.Column(db.Enum('draft', 'approved', 'paid', name='payroll_status'), default='draft')
     date_generated = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -115,7 +115,7 @@ class Report(db.Model):
     report_name  = db.Column(db.String(100), nullable=False)
     generated_by = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     generated_on = db.Column(db.DateTime, default=datetime.utcnow)
-    report_type  = db.Column(db.Enum('attendance', 'payroll', 'summary'), nullable=False)
+    report_type = db.Column(db.Enum('attendance', 'payroll', 'summary', name='report_type'), nullable=False)
     parameters   = db.Column(db.Text, nullable=True)   # JSON string of filters used
 
     def to_dict(self):
