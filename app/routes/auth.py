@@ -81,9 +81,18 @@ def register():
     )
 
 
-    @auth_bp.route('/setup', methods=['GET'])
-    def setup():
-        
+    db.session.add(new_user)
+    db.session.commit()
+    log_activity(new_user.user_id, f"New user '{new_user.username}' registered.")
+
+    return jsonify({
+        'message': 'User registered successfully.',
+        'user': new_user.to_dict()
+    }), 201
+
+@auth_bp.route('/setup', methods=['GET'])
+def setup():
+    """Temporary route to seed admin user - delete after use"""
     from werkzeug.security import generate_password_hash
     from app import db
     from app.models.models import User
@@ -101,18 +110,4 @@ def register():
     )
     db.session.add(admin)
     db.session.commit()
-    return jsonify({'message': 'Admin created successfully!'}), 201
-
-
-
-
-    db.session.add(new_user)
-    db.session.commit()
-    log_activity(new_user.user_id, f"New user '{new_user.username}' registered.")
-
-    return jsonify({
-        'message': 'User registered successfully.',
-        'user': new_user.to_dict()
-    }), 201
-
-    
+    return jsonify({'message': 'Admin created successfully!'}), 201  
