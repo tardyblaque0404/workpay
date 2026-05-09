@@ -40,4 +40,12 @@ def create_app(config_name='default'):
     app.register_blueprint(payroll_bp,    url_prefix='/api/payroll')
     app.register_blueprint(reports_bp,    url_prefix='/api/reports')
 
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', 'https://miliki-kasri.vercel.app')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
+
     return app
